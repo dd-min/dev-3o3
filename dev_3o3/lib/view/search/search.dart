@@ -1,9 +1,10 @@
+import 'package:dev_3o3/data/data.dart';
 import 'package:dev_3o3/manager/search_manager.dart';
 import 'package:dev_3o3/manager/search_proxy.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../data/data.dart';
+import '../common/item_view.dart';
 
 class SearchView extends StatefulWidget {
   const SearchView({super.key});
@@ -12,7 +13,10 @@ class SearchView extends StatefulWidget {
   State<SearchView> createState() => _SearchViewState();
 }
 
-class _SearchViewState extends State<SearchView> {
+class _SearchViewState extends State<SearchView> with AutomaticKeepAliveClientMixin {
+
+  @override
+  bool get wantKeepAlive => true;
 
   String _searchText = '';
 
@@ -23,9 +27,8 @@ class _SearchViewState extends State<SearchView> {
     super.initState();
 
     textController.addListener(_listener);
-
-    SearchManager.instance().init();
   }
+
 
   @override
   void dispose() {
@@ -36,6 +39,7 @@ class _SearchViewState extends State<SearchView> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Column(
       children: [
         _searchWidget(),
@@ -47,72 +51,76 @@ class _SearchViewState extends State<SearchView> {
     );
   }
 
-    Widget _searchWidget() {
+  Widget _searchWidget() {
     return Column(
       children: [
-        const Align(
-          alignment: Alignment.topLeft,
-          child: Text('검색 필드'),
+        const Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: Text('검색 필드', style: TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold),),
+          ),
         ),
-        Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Expanded(
-              child: TextField(
-                controller: textController,
-                decoration: const InputDecoration(
-                  hintText: '검색어를 입력해주세요',
+        Padding(
+          padding: const EdgeInsets.only(left: 10, right: 10),
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: textController,
+                  decoration: const InputDecoration(
+                    hintText: '검색어를 입력해주세요',
+                  ),
+                  onSubmitted: (value) {
+                    setState(() async {
+                      await SearchManager.instance().search(_searchText);
+                    });
+                  },
                 ),
               ),
-            ),
-            ElevatedButton(
-              onPressed: () async => await SearchManager.instance().search(_searchText), 
-              child: const Text('Search'), 
-            ),
-          ],
+              ElevatedButton(
+                onPressed: () {
+                  setState(() async {
+                    await SearchManager.instance().search(_searchText);
+                  });
+                }, 
+                child: const Text('Search'), 
+              ),
+            ],
+          ),
         ),
       ],
     );
   }
 
-  Widget _itemWidget(SearchData data) {
-    // final state = repo.favorites.contains(data) == true ? 'On' : 'Off';
-    return Column(
-          children: [
-            Image.network(data.thumbnailUrl),
-            Text('display: ${data.displaySiteName}'),
-          //   ElevatedButton(
-          //     onPressed: () {
-          //       _toggleFavorite(data);
-          //     }, 
-          //     // child: Text('favorSate : $state'))
-          ],
-        );
-  }
-
   Widget _searchViewWidget() {
+    return Consumer<SearchProxy>(
+      builder: (context, value, child) {
 
-    final proxy = context.watch<SearchProxy>();
+        final searchs = value.searchDatas;
 
-    final repo = proxy.searchDatas;
-
-    if (repo.isEmpty || _searchText.isEmpty) {
-      return const Align(
-        alignment: Alignment.center,
-        child: Text('검색어를 입력해주세요')
-      );
-    }
-
-    return ListView.builder(
-      shrinkWrap: true,
-      itemCount: repo.length,
-      itemBuilder: (context, index) {
-
-        final item = repo[index];
-
-        return _itemWidget(item);
-      }
+         if (searchs.isEmpty || _searchText.isEmpty) {
+            return const Align(
+              alignment: Alignment.center,
+              child: Text('검색어를 입력해주세요')
+            );
+        } 
+        
+        return ListView.builder(
+          padding: EdgeInsets.zero,
+          itemCount: searchs.length,
+          itemBuilder: (context, index) {
+      
+            SearchData item = searchs[index];
+      
+            return GridItemWidget(
+              data: item,
+              );
+          }
+        );
+      },
     );
   }
 

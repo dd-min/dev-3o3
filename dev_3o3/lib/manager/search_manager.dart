@@ -49,7 +49,7 @@ class SearchManager {
   /// 
   
   Future<void> initLoadFavor() async {
-    await _searchRepo.initLoadFavor();
+    await _searchRepo.loadFavor();
 
     _proxy.notify();
   }
@@ -60,8 +60,8 @@ class SearchManager {
     _proxy.notify();
   }
 
-  void toggleFavor(SearchData data) {
-    _searchRepo.toggleFavorite(data);
+  Future<void> toggleFavor(SearchData data) async {
+    await _searchRepo.toggleFavor(data);
 
     _proxy.notify();
   }

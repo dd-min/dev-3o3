@@ -2,9 +2,8 @@ import 'package:dev_3o3/manager/search_manager.dart';
 import 'package:dev_3o3/view/favorites/favorites.dart';
 import 'package:dev_3o3/view/search/search.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
-
-part 'view/main/func.dart';
 
 void main() {
   // runApp(const MyApp());
@@ -23,10 +22,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       title: '삼쩜삼 검색 페이지',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
         useMaterial3: true,
       ),
       home: const MyHomePage(title: '삼쩜삼 검색 페이지'),
@@ -43,43 +42,56 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
+
+  TabController? tabController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    SearchManager.instance().init();
+
+    tabController = TabController(length: 2, vsync: this);
+    tabController?.addListener(tabListener);
+  }
+
+  @override
+  void dispose() {
+    tabController?.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          title: Text(widget.title),
-        ),
-        body: const SafeArea(
-          child: Column(
-            children: [
-              Expanded(
-                child: TabBarView(
-                  children: [
-                    SearchView(),
-                    FavoritesView(),
-                  ]
-                ),
-              ),
-              TabBar(
-                indicatorColor: Colors.black,
-                labelStyle: TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
-                tabs: [
-                  Tab(text: '검색',),
-                  Tab(text: '즐겨찾기',),
-              ])
-            ],
-          ),
-        )
+    return Scaffold(
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: tabController!.index,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: '검색'),
+          BottomNavigationBarItem(icon: Icon(Icons.star), label: '즐겨찾기'),
+        ],
+        onTap: (index) {
+          tabController?.animateTo(index);
+        },
       ),
+      body: SafeArea(
+        child: Expanded(
+          child: TabBarView(
+            controller: tabController,
+            children: const [
+              SearchView(),
+              FavoritesView(),
+            ]
+          ),
+        ),
+      )
     );
+  }
+
+  void tabListener() {
+    setState(() {
+      
+    });
   }
 }

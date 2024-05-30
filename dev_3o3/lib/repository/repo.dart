@@ -13,11 +13,11 @@ class SearchRepository {
     required this.manager,
   });
 
-  List<SearchData> _searchDatas = [];
+  List<SearchData> _searchDatas = <SearchData>[];
 
   List<SearchData> get searchDatas => _searchDatas;
 
-  List<SearchData> _favorDatas = [];
+  List<SearchData> _favorDatas = <SearchData>[];
 
   List<SearchData> get favorDatas => _favorDatas;
 
@@ -34,8 +34,15 @@ class SearchRepository {
   
   // - initLoad
   // - sharedPreferences get
-  Future<void> initLoadFavor() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
+  Future<void> loadFavor({
+    bool isUpdate = false,
+  }) async {
+
+    if (isUpdate == true) {
+      _favorDatas.clear();
+    }
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
 
     final String? favors = prefs.getString('favors');
 
@@ -61,8 +68,7 @@ class SearchRepository {
     try {
 
       if (_searchDatas.isNotEmpty) {
-        print('notData');
-        _searchDatas = [];
+        _searchDatas.clear();
       }
 
       final searchService = SearchService();
@@ -71,12 +77,13 @@ class SearchRepository {
       final searchs  = await searchService.getDatas(search: input);
 
       // isFavor check
-      for (var data in searchs) {
-        if (_favorDatas.contains(data) == true) {
-          data.isFavor = true;
-        }
-        else {
-          data.isFavor = false;
+      for (SearchData search in searchs) {
+        for (SearchData favor in _favorDatas) {
+          if (search.imageUrl == favor.imageUrl) {
+            final newData = search;
+            newData.isFavor = true;
+
+          }
         }
       }
 
@@ -86,17 +93,41 @@ class SearchRepository {
     }
   }
 
-  // - toggleFavor
-  Future<void> toggleFavorite(SearchData data) async{
-    if (_favorDatas.contains(data) == true) {
-      _favorDatas.remove(data);
+  Future<void> toggleFavor(SearchData data) async {
 
-      await overwriteFavorPrefs();
-      return;
+    // remove
+    for (SearchData favor in _favorDatas) {
+      if (favor.imageUrl == data.imageUrl) {
+
+        _favorDatas.remove(favor);
+
+        if (_searchDatas.isNotEmpty) {
+          for (SearchData search in _searchDatas) {
+            if (search.imageUrl == data.imageUrl) {
+              search.isFavor = false;
+              await overwriteFavorPrefs();
+              return;
+            }
+          }
+        }
+
+        await overwriteFavorPrefs();
+        return;
+      }
     }
 
-    _favorDatas.add(data);
-    await overwriteFavorPrefs();
+    // add
+    for (SearchData search in _searchDatas) {
+      if (search.imageUrl == data.imageUrl) {
+
+        search.isFavor = !search.isFavor;
+
+        final newData = data;
+        newData.isFavor = true;
+        _favorDatas.add(newData);
+        await overwriteFavorPrefs();
+      }
+    }
   }
 
   void selectDetail(SearchData data) {
@@ -113,5 +144,7 @@ class SearchRepository {
     final encode = json.encode(_favorDatas);
 
     await prefs.setString('favors', encode);
+
+    await loadFavor(isUpdate: true);
   }
 }

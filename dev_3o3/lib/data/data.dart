@@ -8,7 +8,7 @@
     final String thumbnailUrl;
     final int width;
     final int height;
-    bool? isFavor;
+    bool isFavor;
 
     SearchData(
       {
@@ -20,7 +20,7 @@
         required this.thumbnailUrl,
         required this.width,
         required this.height,
-        this.isFavor,
+        this.isFavor = false,
       }
     );
 
@@ -34,14 +34,14 @@
       thumbnailUrl: json['thumbnail_url'] as String,
       width: json['width'] as int,
       height: json['height'] as int,
-      isFavor: false,
+      isFavor: json['isFavor'] as bool? ?? false,
       );
     }
 
     Map<String, dynamic> toJson() => {
       'collection' : collection,
       'datetime' : dateTime,
-      'display_stiename' : displaySiteName,
+      'display_sitename' : displaySiteName,
       'doc_url' : docUrl,
       'image_url' : imageUrl,
       'thumbnail_url' : thumbnailUrl,
