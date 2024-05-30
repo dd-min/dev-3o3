@@ -4,16 +4,16 @@ import '../data/data.dart';
 
 class SearchService {
 
-  final String getUrl = 'https://dapi.kakao.com/v2/search/image';
+  final String _searchUrl = 'https://dapi.kakao.com/v2/search/image';
 
-  final String authKey = '42d7d928faa73076ccf490056d8cd79b';
+  final String _authKey = '42d7d928faa73076ccf490056d8cd79b';
 
   Future<List<SearchData>> getDatas({
     required String search
     }) async {
 
-    final parseUrl = Uri.parse('$getUrl?target=title&query=$search');
-    final response = await http.get(parseUrl, headers: {"Authorization" : 'KakaoAK $authKey'});
+    final parseUrl = Uri.parse('$_searchUrl?target=title&query=$search');
+    final response = await http.get(parseUrl, headers: {"Authorization" : 'KakaoAK $_authKey'});
 
     if (response.statusCode != 200) {
       return [];
@@ -26,8 +26,8 @@ class SearchService {
     List<SearchData> searchDatas = <SearchData>[];
 
     for (var item in documents) {
-    SearchData data = SearchData.fromJson(item);
-    searchDatas.add(data);
+      SearchData data = SearchData.fromJson(item);
+      searchDatas.add(data);
     }
 
     return searchDatas;
