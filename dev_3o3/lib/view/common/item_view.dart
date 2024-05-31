@@ -78,11 +78,9 @@ class _GridItemWidgetState extends State<GridItemWidget> {
                       child: IconButton(
                         icon: const Icon(Icons.star_outline_sharp),
                         color: isFavor ? Colors.red : Colors.grey,
-                        onPressed: () {
-                          setState(() async {
-                            // isFavor = !isFavor;
-                            await SearchManager.instance().toggleFavor(widget.data);
-                          });
+                        onPressed: () async {
+                          await SearchManager.instance().toggleFavor(widget.data);
+                          setState(() {});
                         },
                       ),
                     ),

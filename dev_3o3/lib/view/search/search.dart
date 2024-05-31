@@ -73,18 +73,20 @@ class _SearchViewState extends State<SearchView> with AutomaticKeepAliveClientMi
                   decoration: const InputDecoration(
                     hintText: '검색어를 입력해주세요',
                   ),
-                  onSubmitted: (value) {
-                    setState(() async {
-                      await SearchManager.instance().search(_searchText);
-                    });
+                  onSubmitted: (value) async {
+
+                    await SearchManager.instance().search(_searchText);
+
+                    FocusScope.of(context).unfocus();
                   },
                 ),
               ),
               ElevatedButton(
-                onPressed: () {
-                  setState(() async {
-                    await SearchManager.instance().search(_searchText);
-                  });
+                onPressed: () async {
+                  await SearchManager.instance().search(_searchText);
+
+                  FocusScope.of(context).unfocus();
+                  setState(() {});
                 }, 
                 child: const Text('Search'), 
               ),

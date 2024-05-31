@@ -76,14 +76,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         },
       ),
       body: SafeArea(
-        child: Expanded(
-          child: TabBarView(
-            controller: tabController,
-            children: const [
-              SearchView(),
-              FavoritesView(),
-            ]
-          ),
+        child: TabBarView(
+          controller: tabController,
+          children: const [
+            SearchView(),
+            FavoritesView(),
+          ]
         ),
       )
     );
